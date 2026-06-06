@@ -28,6 +28,13 @@ export const FinanceProvider = ({ children }) => {
     return res.data;
   };
 
+  const updateTransaction = async (id, data) => {
+    const res = await axios.put(`${API}/transactions/${id}`, data);
+    setTransactions(prev => prev.map(t => t._id === id ? res.data : t));
+    toast.success('Transaction updated!');
+    return res.data;
+  };
+
   const deleteTransaction = async (id) => {
     await axios.delete(`${API}/transactions/${id}`);
     setTransactions(prev => prev.filter(t => t._id !== id));
@@ -43,6 +50,12 @@ export const FinanceProvider = ({ children }) => {
     const res = await axios.post(`${API}/budgets`, data);
     toast.success('Budget saved!');
     return res.data;
+  };
+
+  const deleteBudget = async (id) => {
+    await axios.delete(`${API}/budgets/${id}`);
+    setBudgets(prev => prev.filter(b => b._id !== id));
+    toast.success('Budget deleted');
   };
 
   const fetchSummary = useCallback(async (year) => {
@@ -63,8 +76,9 @@ export const FinanceProvider = ({ children }) => {
   return (
     <FinanceContext.Provider value={{
       transactions, budgets, summary, categoryData, loading,
-      fetchTransactions, addTransaction, deleteTransaction,
-      fetchBudgets, saveBudget, fetchSummary, fetchCategoryData, getInsights,
+      fetchTransactions, addTransaction, updateTransaction, deleteTransaction,
+      fetchBudgets, saveBudget, deleteBudget,
+      fetchSummary, fetchCategoryData, getInsights,
     }}>
       {children}
     </FinanceContext.Provider>
