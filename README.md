@@ -27,11 +27,13 @@ A full-stack personal finance dashboard that helps users track income, expenses,
 
 ### Transactions Preview
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dc137174-2737-41b4-bbce-d4afd1f3d37b" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/818b0a3c-8b17-4886-a0f6-1f744795fd00" />
+
 
 ### Budgets Preview
 
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a7f27a10-40d8-42b2-95d4-f52930b3608e" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/356fec56-7cb7-43ac-9dab-b2d82678a048" />
+
 
 
 ## Installation
