@@ -23,7 +23,7 @@ A full-stack personal finance dashboard that helps users track income, expenses,
 
 ### Backend
 npm install
-npm start
+npm run dev
 
 ### Frontend
 npm install
