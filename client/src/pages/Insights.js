@@ -57,7 +57,7 @@ export default function Insights() {
     <div>
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.6rem', marginBottom: 4 }}>AI Financial Insights</h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Powered by Gemini — personalized advice based on your spending</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Powered by AI — personalized advice based on your spending</p>
       </div>
 
       {!insights && !loading && (
