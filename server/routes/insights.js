@@ -1,5 +1,5 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Groq = require('groq-sdk');
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
 const { protect } = require('../middleware/auth');
@@ -7,7 +7,7 @@ const { protect } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 router.post('/analyze', async (req, res) => {
   try {
@@ -36,33 +36,40 @@ router.post('/analyze', async (req, res) => {
         categoryBreakdown[t.category] = (categoryBreakdown[t.category] || 0) + t.amount;
       });
 
-    const prompt = `You are a smart personal finance advisor. Analyze this data and give 3-4 concise actionable insights. Reply ONLY with this exact JSON format, no extra text:
+    const prompt = `You are a smart personal finance advisor for Indian users. Analyze this month's data and reply ONLY with valid JSON, no extra text, no markdown, no backticks.
+
 {
   "summary": "one sentence overall assessment",
   "insights": [
-    { "type": "warning|tip|achievement", "title": "short title", "detail": "1-2 sentence advice" }
+    { "type": "warning|tip|achievement", "title": "short title", "detail": "1-2 sentence actionable advice" }
   ],
-  "savingsTip": "one specific saving tip for next month"
+  "savingsTip": "one specific actionable saving tip for next month"
 }
 
-Data:
+Financial Data:
 Total Income: ₹${totalIncome}
 Total Expenses: ₹${totalExpense}
 Net Savings: ₹${totalIncome - totalExpense}
+Savings Rate: ${totalIncome > 0 ? Math.round(((totalIncome - totalExpense) / totalIncome) * 100) : 0}%
 Category Breakdown: ${JSON.stringify(categoryBreakdown)}
-Budgets: ${JSON.stringify(budgets.map(b => ({ category: b.category, limit: b.limit })))}`;
+Budgets: ${JSON.stringify(budgets.map(b => ({ category: b.category, limit: b.limit })))}
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent(prompt);
-    const raw = result.response.text();
+Give exactly 3 insights. Be specific, friendly, and practical for Indian context.`;
 
+    const completion = await groq.chat.completions.create({
+      messages: [{ role: 'user', content: prompt }],
+      model: 'llama-3.3-70b-versatile',
+      temperature: 0.7,
+      max_tokens: 800,
+    });
+
+    const raw = completion.choices[0]?.message?.content || '';
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    const parsed = jsonMatch
-      ? JSON.parse(jsonMatch[0])
-      : { summary: raw, insights: [], savingsTip: '' };
-
+    if (!jsonMatch) throw new Error('Invalid response from AI');
+    const parsed = JSON.parse(jsonMatch[0]);
     res.json(parsed);
   } catch (err) {
+    console.error('Insights error:', err.message);
     res.status(500).json({ message: err.message });
   }
 });
