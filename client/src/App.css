@@ -55,7 +55,7 @@ label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; dis
 .stat-value {
   font-size: 1.8rem;
   font-weight: 700;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   letter-spacing: -0.03em;
 }
 .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; }
