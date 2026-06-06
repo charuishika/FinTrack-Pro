@@ -10,7 +10,15 @@ const insightRoutes = require('./routes/insights');
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:3000' }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://fin-track-pro-three.vercel.app",
+      "https://fin-track-pro-git-main-charuishika-s-s-projects.vercel.app"
+    ]
+  })
+);
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
