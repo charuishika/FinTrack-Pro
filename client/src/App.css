@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -18,12 +18,22 @@
   --sidebar-collapsed: 70px;
 }
 
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-weight: 400;
+}
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
 
-.btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+.btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; font-family: 'Inter', sans-serif; white-space: nowrap; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: var(--primary-light); transform: translateY(-1px); }
 .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
@@ -31,7 +41,7 @@ h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; }
 .btn-danger { background: #ef444420; color: var(--danger); border: 1px solid #ef444440; }
 .btn-danger:hover { background: #ef444430; }
 
-input, select, textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 1rem; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; width: 100%; outline: none; transition: border-color 0.2s; }
+input, select, textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.65rem 1rem; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; width: 100%; outline: none; transition: border-color 0.2s; }
 input:focus, select:focus { border-color: var(--primary); }
 input::placeholder { color: var(--text-muted); }
 select option { background: var(--surface); }
@@ -42,7 +52,12 @@ label { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; dis
 .badge-expense { background: #ef444420; color: var(--danger); }
 
 .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
-.stat-value { font-size: 1.8rem; font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.03em;
+}
 .stat-label { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.25rem; }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 2rem; }
