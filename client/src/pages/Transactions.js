@@ -3,8 +3,8 @@ import { useFinance } from '../context/FinanceContext';
 import { PlusIcon, TrashIcon, IncomeIcon, ExpenseIcon } from '../components/Icons';
 import toast from 'react-hot-toast';
 
-const INCOME_CATS = ['Salary','Freelance','Investment','Other Income'];
-const EXPENSE_CATS = ['Food','Transport','Housing','Entertainment','Healthcare','Shopping','Education','Utilities','Other Expense'];
+const INCOME_CATS = ['Salary', 'Freelance', 'Investment', 'Other Income'];
+const EXPENSE_CATS = ['Food', 'Transport', 'Housing', 'Entertainment', 'Healthcare', 'Shopping', 'Education', 'Utilities', 'Other Expense'];
 const fmt = (n) => `₹${n?.toLocaleString('en-IN') || 0}`;
 const defaultForm = { type: 'expense', amount: '', category: 'Food', description: '', date: new Date().toISOString().split('T')[0] };
 
@@ -108,7 +108,19 @@ export default function Transactions() {
                 <p style={{ fontWeight: 600, color: t.type === 'income' ? 'var(--success)' : 'var(--danger)', fontSize: '0.95rem', flexShrink: 0 }}>
                   {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}
                 </p>
-                <button className="btn btn-danger" style={{ padding: '0.35rem 0.6rem', flexShrink: 0 }} onClick={() => deleteTransaction(t._id)}>
+                <button
+                  className="btn btn-danger"
+                  style={{ padding: '0.35rem 0.6rem', flexShrink: 0 }}
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        `Delete ${t.description || t.category} transaction?`
+                      )
+                    ) {
+                      deleteTransaction(t._id);
+                    }
+                  }}
+                >
                   <TrashIcon size={14} />
                 </button>
               </div>
