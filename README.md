@@ -2,6 +2,11 @@
 
 A full-stack personal finance dashboard that helps users track income, expenses, budgets, and financial insights.
 
+## Dashboard Preview
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9e2f8027-64a4-465b-a16a-7c9e6db492e9" />
+
+
 ## Features
 - User Authentication (JWT)
 - Income & Expense Tracking
