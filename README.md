@@ -2,6 +2,10 @@
 
 A full-stack personal finance dashboard that helps users track income, expenses, budgets, and financial insights.
 
+🔗 Live Demo: https://fin-track-pro-three.vercel.app
+
+🔗 GitHub Repository: https://github.com/charuishika/FinTrack-Pro
+
 ## Features
 - User Authentication (JWT)
 - Income & Expense Tracking
