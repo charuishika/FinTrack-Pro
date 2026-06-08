@@ -5,6 +5,7 @@ const { protect } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
+// GET all transactions
 router.get('/', async (req, res) => {
   try {
     const { type, category, month, year, limit = 50 } = req.query;
@@ -24,25 +25,8 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
-  try {
-    const t = await Transaction.create({ ...req.body, user: req.user._id });
-    res.status(201).json(t);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-
-router.delete('/:id', async (req, res) => {
-  try {
-    const t = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user._id });
-    if (!t) return res.status(404).json({ message: 'Not found' });
-    res.json({ message: 'Deleted' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
+// ⚠️ SPECIFIC ROUTES MUST BE BEFORE /:id
+// GET /summary
 router.get('/summary', async (req, res) => {
   try {
     const { year = new Date().getFullYear() } = req.query;
@@ -62,6 +46,7 @@ router.get('/summary', async (req, res) => {
   }
 });
 
+// GET /by-category
 router.get('/by-category', async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -78,6 +63,46 @@ router.get('/by-category', async (req, res) => {
       { $sort: { total: -1 } },
     ]);
     res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST - add transaction
+router.post('/', async (req, res) => {
+  try {
+    if (!req.body.amount || Number(req.body.amount) <= 0)
+      return res.status(400).json({ message: 'Amount must be greater than 0' });
+    const t = await Transaction.create({ ...req.body, user: req.user._id });
+    res.status(201).json(t);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// PUT - edit transaction /:id
+router.put('/:id', async (req, res) => {
+  try {
+    if (!req.body.amount || Number(req.body.amount) <= 0)
+      return res.status(400).json({ message: 'Amount must be greater than 0' });
+    const t = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!t) return res.status(404).json({ message: 'Transaction not found' });
+    res.json(t);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// DELETE - delete transaction /:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const t = await Transaction.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!t) return res.status(404).json({ message: 'Not found' });
+    res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
