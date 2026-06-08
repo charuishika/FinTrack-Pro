@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/FinTrack-Pro-6c63ff?style=for-the-badge&logoColor=white" alt="FinTrack Pro" />
-
 # FinTrack Pro
 ### AI-Powered Personal Finance Tracker
 
@@ -30,30 +28,40 @@ A modern full-stack personal finance management application that helps users tra
 ### Dashboard
 <!-- Add your Dashboard screenshot here -->
 <!-- Drag and drop your screenshot image below this line -->
+<img width="1905" height="1004" alt="image" src="https://github.com/user-attachments/assets/ba2a6356-a0a4-4c5b-b2ae-4c6559afa926" />
+
 
 &nbsp;
 
 ### Transactions
 <!-- Add your Transactions page screenshot here -->
 <!-- Drag and drop your screenshot image below this line -->
+<img width="1919" height="1013" alt="image" src="https://github.com/user-attachments/assets/f1fe7d70-2b77-41ed-b465-ebf177b726c9" />
+
 
 &nbsp;
 
 ### Budgets & Alerts
 <!-- Add your Budgets page screenshot here -->
 <!-- Drag and drop your screenshot image below this line -->
+<img width="1919" height="1014" alt="image" src="https://github.com/user-attachments/assets/62ce7fac-34bc-4f3d-aefa-4915f9436b91" />
+
 
 &nbsp;
 
 ### AI Insights
 <!-- Add your AI Insights screenshot here -->
 <!-- Drag and drop your screenshot image below this line -->
+<img width="1919" height="1019" alt="image" src="https://github.com/user-attachments/assets/72ff95de-6307-41ad-b9d3-89c1ce9af139" />
+
 
 &nbsp;
 
 ### Progressive Web App (PWA)
 <!-- Add your PWA install screenshot here -->
 <!-- Drag and drop your screenshot image below this line -->
+<img width="1917" height="986" alt="image" src="https://github.com/user-attachments/assets/0de373e6-9f26-4c74-b86c-915bfa2d7558" />
+
 
 &nbsp;
 
@@ -338,7 +346,7 @@ SASTRA Deemed University
 
 <div align="center">
 
-Made with dedication for TCS Recruitment 2025
+Built as a full-stack personal finance management platform showcasing modern web development, cloud deployment, and AI integration.
 
 ⭐ Star this repo if you found it helpful!
 
