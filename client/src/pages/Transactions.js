@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
 import { PlusIcon, IncomeIcon, ExpenseIcon } from '../components/Icons';
+import { exportToCSV } from '../utils/exportCSV';
 import toast from 'react-hot-toast';
 
 const INCOME_CATS = ['Salary','Freelance','Investment','Other Income'];
@@ -8,7 +9,7 @@ const EXPENSE_CATS = ['Food','Transport','Housing','Entertainment','Healthcare',
 const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
 const defaultForm = { type: 'expense', amount: '', category: 'Food', description: '', date: new Date().toISOString().split('T')[0] };
 
-// ── Icons ───────────────────────────────────────────────────
+// ── Icons ────────────────────────────────────────────────────
 const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -25,8 +26,15 @@ const CloseIcon = () => (
     <path d="M18 6L6 18M6 6l12 12"/>
   </svg>
 );
+const ExportIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+    <polyline points="7 10 12 15 17 10"/>
+    <line x1="12" y1="15" x2="12" y2="3"/>
+  </svg>
+);
 
-// ── Confirm Delete Dialog ───────────────────────────────────
+// ── Confirm Delete Dialog ────────────────────────────────────
 function ConfirmDialog({ transaction, onConfirm, onCancel }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -53,7 +61,7 @@ function ConfirmDialog({ transaction, onConfirm, onCancel }) {
   );
 }
 
-// ── Edit Modal ──────────────────────────────────────────────
+// ── Edit Modal ───────────────────────────────────────────────
 function EditModal({ transaction, onSave, onClose }) {
   const [form, setForm] = useState({
     type: transaction.type,
@@ -63,7 +71,6 @@ function EditModal({ transaction, onSave, onClose }) {
     date: transaction.date?.split('T')[0] || new Date().toISOString().split('T')[0],
   });
   const [errors, setErrors] = useState({});
-
   const cats = form.type === 'income' ? INCOME_CATS : EXPENSE_CATS;
 
   const validate = () => {
@@ -88,7 +95,6 @@ function EditModal({ transaction, onSave, onClose }) {
             <CloseIcon />
           </button>
         </div>
-
         <div className="form-grid">
           <div>
             <label>Type</label>
@@ -123,7 +129,6 @@ function EditModal({ transaction, onSave, onClose }) {
               onChange={e => setForm({ ...form, description: e.target.value })} />
           </div>
         </div>
-
         <div style={{ display: 'flex', gap: 10, marginTop: '1.25rem' }}>
           <button className="btn btn-primary" onClick={handleSave}>Save Changes</button>
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
@@ -133,7 +138,7 @@ function EditModal({ transaction, onSave, onClose }) {
   );
 }
 
-// ── Main Transactions Page ──────────────────────────────────
+// ── Main Transactions Page ───────────────────────────────────
 export default function Transactions() {
   const { transactions, fetchTransactions, addTransaction, updateTransaction, deleteTransaction, loading } = useFinance();
   const [form, setForm] = useState(defaultForm);
@@ -154,8 +159,8 @@ export default function Transactions() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const e2 = validateForm();
-    if (Object.keys(e2).length > 0) { setFormErrors(e2); return; }
+    const errs = validateForm();
+    if (Object.keys(errs).length > 0) { setFormErrors(errs); return; }
     setFormErrors({});
     await addTransaction({ ...form, amount: Number(form.amount) });
     setForm(defaultForm);
@@ -172,6 +177,15 @@ export default function Transactions() {
     setDeleteTarget(null);
   };
 
+  const handleExport = () => {
+    const success = exportToCSV(transactions, 'fintrack-transactions');
+    if (success) {
+      toast.success(`Exported ${transactions.length} transactions to CSV!`);
+    } else {
+      toast.error('No transactions to export');
+    }
+  };
+
   const cats = form.type === 'income' ? INCOME_CATS : EXPENSE_CATS;
 
   return (
@@ -183,11 +197,18 @@ export default function Transactions() {
         <EditModal transaction={editTarget} onSave={handleEdit} onClose={() => setEditTarget(null)} />
       )}
 
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 10 }}>
         <h1 style={{ fontSize: '1.6rem' }}>Transactions</h1>
-        <button className="btn btn-primary" onClick={() => setShowForm(s => !s)}>
-          {showForm ? <><CloseIcon /> Close</> : <><PlusIcon size={16} /> Add Transaction</>}
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {/* Export CSV Button */}
+          <button className="btn btn-ghost" onClick={handleExport}>
+            <ExportIcon /> Export CSV
+          </button>
+          <button className="btn btn-primary" onClick={() => setShowForm(s => !s)}>
+            {showForm ? <><CloseIcon /> Close</> : <><PlusIcon size={16} /> Add Transaction</>}
+          </button>
+        </div>
       </div>
 
       {/* Add Form */}
@@ -237,8 +258,8 @@ export default function Transactions() {
         </div>
       )}
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: '1rem', flexWrap: 'wrap' }}>
+      {/* Filters row */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <select value={filter.type} onChange={e => setFilter({ ...filter, type: e.target.value })} style={{ width: 140 }}>
           <option value="">All Types</option>
           <option value="income">Income</option>
@@ -248,6 +269,16 @@ export default function Transactions() {
           <option value="">All Categories</option>
           {[...INCOME_CATS, ...EXPENSE_CATS].map(c => <option key={c}>{c}</option>)}
         </select>
+        {/* Export info */}
+        {transactions.length > 0 && (
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+            {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} — <span
+              onClick={handleExport}
+              style={{ color: 'var(--primary-light)', cursor: 'pointer', textDecoration: 'underline' }}>
+              Export filtered as CSV
+            </span>
+          </span>
+        )}
       </div>
 
       {/* Transaction List */}
@@ -275,16 +306,13 @@ export default function Transactions() {
                 <p style={{ fontWeight: 600, color: t.type === 'income' ? 'var(--success)' : 'var(--danger)', fontSize: '0.95rem', flexShrink: 0 }}>
                   {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}
                 </p>
-                {/* Edit & Delete */}
                 <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                   <button onClick={() => setEditTarget(t)}
-                    style={{ background: '#6c63ff20', border: '1px solid #6c63ff40', color: 'var(--primary-light)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                    title="Edit">
+                    style={{ background: '#6c63ff20', border: '1px solid #6c63ff40', color: 'var(--primary-light)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <EditIcon />
                   </button>
                   <button onClick={() => setDeleteTarget(t)}
-                    style={{ background: '#ef444420', border: '1px solid #ef444440', color: 'var(--danger)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                    title="Delete">
+                    style={{ background: '#ef444420', border: '1px solid #ef444440', color: 'var(--danger)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                     <TrashIcon />
                   </button>
                 </div>
