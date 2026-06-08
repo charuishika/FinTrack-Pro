@@ -3,6 +3,7 @@ import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Responsive
 import { useFinance } from '../context/FinanceContext';
 import { useAuth } from '../context/AuthContext';
 import { IncomeIcon, ExpenseIcon, SavingsIcon, RateIcon } from '../components/Icons';
+import { DashboardAlerts } from '../components/BudgetAlerts';
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COLORS = ['#6c63ff','#22c55e','#f59e0b','#ef4444','#06b6d4','#ec4899','#8b5cf6'];
@@ -10,7 +11,8 @@ const fmt = (n) => `₹${n?.toLocaleString('en-IN') || 0}`;
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { fetchTransactions, fetchSummary, fetchCategoryData, transactions, summary, categoryData } = useFinance();
+  const { fetchTransactions, fetchSummary, fetchCategoryData, fetchBudgets,
+          transactions, summary, categoryData, budgets } = useFinance();
   const [chartData, setChartData] = useState([]);
 
   const now = new Date();
@@ -21,6 +23,7 @@ export default function Dashboard() {
     fetchTransactions({ month, year, limit: 5 });
     fetchSummary(year);
     fetchCategoryData(month, year);
+    fetchBudgets(month, year); // fetch budgets for alerts
   }, []);
 
   useEffect(() => {
@@ -53,18 +56,22 @@ export default function Dashboard() {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{MONTHS[month-1]} {year} — Financial Overview</p>
       </div>
 
+      {/* Stat Cards */}
       <div className="stats-grid">
         {stats.map(({ label, value, color, Icon }) => (
           <div key={label} className="stat-card">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
               <p className="stat-label">{label}</p>
-              <span style={{ color, opacity: 0.8 }}><Icon size={18} color={color} /></span>
+              <Icon size={18} color={color} />
             </div>
             <p className="stat-value" style={{ color }}>{value}</p>
           </div>
         ))}
       </div>
 
+      
+
+      {/* Charts */}
       <div className="charts-grid">
         <div className="card">
           <h3 style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>Income vs Expenses — {year}</h3>
@@ -81,8 +88,10 @@ export default function Dashboard() {
                 </linearGradient>
               </defs>
               <XAxis dataKey="month" tick={{ fill: '#8b90a8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#8b90a8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} width={45} />
-              <Tooltip formatter={v => fmt(v)} contentStyle={{ background: '#1a1d27', border: '1px solid #2e3347', borderRadius: 10 }} />
+              <YAxis tick={{ fill: '#8b90a8', fontSize: 11 }} axisLine={false} tickLine={false}
+                tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} width={45} />
+              <Tooltip formatter={v => fmt(v)}
+                contentStyle={{ background: '#1a1d27', border: '1px solid #2e3347', borderRadius: 10 }} />
               <Area type="monotone" dataKey="income" stroke="#22c55e" fill="url(#income)" strokeWidth={2} />
               <Area type="monotone" dataKey="expense" stroke="#ef4444" fill="url(#expense)" strokeWidth={2} />
               <Legend formatter={v => <span style={{ color: '#8b90a8', fontSize: 12 }}>{v}</span>} />
@@ -95,10 +104,12 @@ export default function Dashboard() {
           {pieData.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
+                <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85}
+                  paddingAngle={3} dataKey="value">
                   {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                 </Pie>
-                <Tooltip formatter={v => fmt(v)} contentStyle={{ background: '#1a1d27', border: '1px solid #2e3347', borderRadius: 10 }} />
+                <Tooltip formatter={v => fmt(v)}
+                  contentStyle={{ background: '#1a1d27', border: '1px solid #2e3347', borderRadius: 10 }} />
                 <Legend formatter={v => <span style={{ color: '#8b90a8', fontSize: 11 }}>{v}</span>} />
               </PieChart>
             </ResponsiveContainer>
@@ -110,22 +121,34 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Budget Alerts — only shows if there are warnings/exceeded */}
+      <DashboardAlerts budgets={budgets} />
+
+      {/* Recent Transactions */}
       <div className="card">
         <h3 style={{ marginBottom: '1.25rem', fontSize: '1rem' }}>Recent Transactions</h3>
         {transactions.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No transactions yet. Add your first one!</p>
+          <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
+            No transactions yet. Add your first one!
+          </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {transactions.map(t => (
               <div key={t._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0.75rem', background: 'var(--surface2)', borderRadius: 10 }}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: t.type === 'income' ? '#22c55e20' : '#ef444420', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%',
+                  background: t.type === 'income' ? '#22c55e20' : '#ef444420',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {t.type === 'income'
                     ? <IncomeIcon size={16} color="var(--success)" />
                     : <ExpenseIcon size={16} color="var(--danger)" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: '0.9rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.description || t.category}</p>
-                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{t.category} · {new Date(t.date).toLocaleDateString()}</p>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {t.description || t.category}
+                  </p>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    {t.category} · {new Date(t.date).toLocaleDateString()}
+                  </p>
                 </div>
                 <p style={{ fontWeight: 600, color: t.type === 'income' ? 'var(--success)' : 'var(--danger)', fontSize: '0.95rem', flexShrink: 0 }}>
                   {t.type === 'income' ? '+' : '-'}{fmt(t.amount)}

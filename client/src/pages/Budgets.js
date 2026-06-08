@@ -1,21 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useFinance } from '../context/FinanceContext';
+import { BudgetCardAlert } from '../components/BudgetAlerts';
 import toast from 'react-hot-toast';
 
 const EXPENSE_CATS = ['Food','Transport','Housing','Entertainment','Healthcare','Shopping','Education','Utilities','Other Expense'];
 const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
 
-const WarnIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round">
-    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-  </svg>
-);
-const AlertIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round">
-    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-  </svg>
-);
 const EditIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
@@ -33,7 +23,7 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div className="card" style={{ maxWidth: 380, width: '100%', textAlign: 'center' }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.75rem' }}>
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="1.5" strokeLinecap="round">
             <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
             <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -43,7 +33,7 @@ function ConfirmDialog({ message, onConfirm, onCancel }) {
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>{message}</p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <button className="btn btn-ghost" onClick={onCancel}>Cancel</button>
-          <button className="btn btn-danger" style={{ background: 'var(--danger)', color: 'white' }} onClick={onConfirm}>Delete</button>
+          <button className="btn" style={{ background: 'var(--danger)', color: 'white' }} onClick={onConfirm}>Delete</button>
         </div>
       </div>
     </div>
@@ -70,14 +60,10 @@ function EditModal({ budget, onSave, onClose }) {
         <h3 style={{ marginBottom: '1.25rem' }}>Edit Budget — {budget.category}</h3>
         <div style={{ marginBottom: '1rem' }}>
           <label>Monthly Limit (₹)</label>
-          <input
-            type="number"
-            value={limit}
-            min="1"
+          <input type="number" value={limit} min="1"
             onChange={e => { setLimit(e.target.value); setError(''); }}
-            placeholder="Enter amount greater than 0"
-            autoFocus
-          />
+            placeholder="Enter amount greater than 0" autoFocus
+            style={{ borderColor: error ? 'var(--danger)' : undefined }} />
           {error && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginTop: 6 }}>{error}</p>}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -85,6 +71,51 @@ function EditModal({ budget, onSave, onClose }) {
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Summary bar at top ──────────────────────────────────────
+function AlertSummary({ budgets }) {
+  const exceeded = budgets.filter(b => b.limit > 0 && b.spent > b.limit).length;
+  const warning = budgets.filter(b => b.limit > 0 && b.spent <= b.limit && (b.spent / b.limit) >= 0.8).length;
+  const ok = budgets.filter(b => b.limit > 0 && (b.spent / b.limit) < 0.8).length;
+
+  if (budgets.length === 0) return null;
+
+  return (
+    <div style={{ display: 'flex', gap: 10, marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+      {exceeded > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 1rem', background: '#ef444415', border: '1px solid #ef444440', borderRadius: 10 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span style={{ fontSize: '0.85rem', color: 'var(--danger)', fontWeight: 500 }}>
+            {exceeded} exceeded
+          </span>
+        </div>
+      )}
+      {warning > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 1rem', background: '#f59e0b15', border: '1px solid #f59e0b40', borderRadius: 10 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span style={{ fontSize: '0.85rem', color: 'var(--warning)', fontWeight: 500 }}>
+            {warning} at warning level
+          </span>
+        </div>
+      )}
+      {ok > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0.6rem 1rem', background: '#22c55e15', border: '1px solid #22c55e40', borderRadius: 10 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          <span style={{ fontSize: '0.85rem', color: 'var(--success)', fontWeight: 500 }}>
+            {ok} under control
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -127,7 +158,7 @@ export default function Budgets() {
     fetchBudgets(month, year);
   };
 
-  const getColor = (pct) => {
+  const getBarColor = (pct) => {
     if (pct >= 100) return 'var(--danger)';
     if (pct >= 80) return 'var(--warning)';
     return 'var(--primary)';
@@ -135,7 +166,6 @@ export default function Budgets() {
 
   return (
     <div>
-      {/* Confirm Delete Dialog */}
       {deleteTarget && (
         <ConfirmDialog
           message={`Delete the "${deleteTarget.category}" budget? This cannot be undone.`}
@@ -143,16 +173,11 @@ export default function Budgets() {
           onCancel={() => setDeleteTarget(null)}
         />
       )}
-
-      {/* Edit Modal */}
       {editBudget && (
-        <EditModal
-          budget={editBudget}
-          onSave={handleEdit}
-          onClose={() => setEditBudget(null)}
-        />
+        <EditModal budget={editBudget} onSave={handleEdit} onClose={() => setEditBudget(null)} />
       )}
 
+      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: 10 }}>
         <h1 style={{ fontSize: '1.6rem' }}>Budgets</h1>
         <div style={{ display: 'flex', gap: 10 }}>
@@ -167,6 +192,9 @@ export default function Budgets() {
         </div>
       </div>
 
+      {/* Alert summary bar */}
+      <AlertSummary budgets={budgets} />
+
       {/* Add Budget Form */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Set Budget</h3>
@@ -179,14 +207,9 @@ export default function Budgets() {
           </div>
           <div style={{ flex: '1 1 140px' }}>
             <label>Monthly Limit (₹)</label>
-            <input
-              type="number"
-              placeholder="e.g. 5000"
-              value={form.limit}
-              min="1"
+            <input type="number" placeholder="e.g. 5000" value={form.limit} min="1"
               onChange={e => { setForm({ ...form, limit: e.target.value }); setFormError(''); }}
-              style={{ borderColor: formError ? 'var(--danger)' : undefined }}
-            />
+              style={{ borderColor: formError ? 'var(--danger)' : undefined }} />
             {formError && <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: 5 }}>{formError}</p>}
           </div>
           <div style={{ paddingTop: formError ? 0 : '1.4rem' }}>
@@ -206,11 +229,11 @@ export default function Budgets() {
             const limit = Number(b.limit) || 0;
             const spent = Number(b.spent) || 0;
             const pct = limit > 0 ? Math.min(Math.round((spent / limit) * 100), 100) : 0;
-            const color = getColor(pct);
+            const color = getBarColor(pct);
 
             return (
               <div key={b._id} className="card">
-                {/* Header */}
+                {/* Card header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ minWidth: 0 }}>
                     <h3 style={{ fontSize: '1rem' }}>{b.category}</h3>
@@ -220,18 +243,13 @@ export default function Budgets() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     <p style={{ fontSize: '1.4rem', fontWeight: 700, color, fontFamily: 'Space Grotesk' }}>{pct}%</p>
-                    {/* Edit & Delete buttons */}
                     <div style={{ display: 'flex', gap: 4 }}>
-                      <button
-                        onClick={() => setEditBudget(b)}
-                        style={{ background: '#6c63ff20', border: '1px solid #6c63ff40', color: 'var(--primary-light)', borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                        title="Edit budget">
+                      <button onClick={() => setEditBudget(b)}
+                        style={{ background: '#6c63ff20', border: '1px solid #6c63ff40', color: 'var(--primary-light)', borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                         <EditIcon />
                       </button>
-                      <button
-                        onClick={() => setDeleteTarget(b)}
-                        style={{ background: '#ef444420', border: '1px solid #ef444440', color: 'var(--danger)', borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                        title="Delete budget">
+                      <button onClick={() => setDeleteTarget(b)}
+                        style={{ background: '#ef444420', border: '1px solid #ef444440', color: 'var(--danger)', borderRadius: 8, padding: '5px 8px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                         <TrashIcon />
                       </button>
                     </div>
@@ -239,7 +257,7 @@ export default function Budgets() {
                 </div>
 
                 {/* Progress bar */}
-                <div style={{ background: 'var(--surface2)', borderRadius: 20, height: 8, overflow: 'hidden', marginBottom: 8 }}>
+                <div style={{ background: 'var(--surface2)', borderRadius: 20, height: 8, overflow: 'hidden', marginBottom: 4 }}>
                   <div style={{ width: `${pct}%`, height: '100%', background: color, borderRadius: 20, transition: 'width 0.5s ease' }} />
                 </div>
 
@@ -248,17 +266,8 @@ export default function Budgets() {
                   {b.remaining >= 0 ? `${fmt(b.remaining)} remaining` : `${fmt(Math.abs(b.remaining))} over budget`}
                 </p>
 
-                {/* Alerts */}
-                {pct >= 100 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <WarnIcon /><p style={{ fontSize: '0.78rem', color: 'var(--danger)' }}>Budget exceeded!</p>
-                  </div>
-                )}
-                {pct >= 80 && pct < 100 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <AlertIcon /><p style={{ fontSize: '0.78rem', color: 'var(--warning)' }}>Approaching limit</p>
-                  </div>
-                )}
+                {/* Alert badge — replaces old static text */}
+                <BudgetCardAlert budget={b} />
               </div>
             );
           })}
