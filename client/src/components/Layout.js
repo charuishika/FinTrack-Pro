@@ -7,6 +7,7 @@ import {
   InsightIcon, LogoutIcon, ChevronLeftIcon, ChevronRightIcon,
   MenuIcon, CloseIcon
 } from './Icons';
+import InstallPWA from './InstallPWA';
 
 const navItems = [
   { to: '/', label: 'Dashboard', Icon: DashboardIcon, end: true },
@@ -43,9 +44,14 @@ export default function Layout() {
 
   const sidebarContent = (
     <>
+      {/* Logo */}
       <div style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <LogoIcon size={32} />
-        {!collapsed && <span style={{ fontFamily: 'Space Grotesk', fontWeight: 600, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>FinTrack Pro</span>}
+        {!collapsed && (
+          <span style={{ fontFamily: 'Space Grotesk', fontWeight: 600, fontSize: '1.1rem', whiteSpace: 'nowrap' }}>
+            FinTrack Pro
+          </span>
+        )}
         <button onClick={() => setCollapsed(c => !c)}
           style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
           className="hide-mobile">
@@ -53,6 +59,7 @@ export default function Layout() {
         </button>
       </div>
 
+      {/* Nav */}
       <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: 4 }}>
         {navItems.map(({ to, label, Icon, end }) => (
           <NavLink key={to} to={to} end={end}
@@ -71,7 +78,12 @@ export default function Layout() {
         ))}
       </nav>
 
+      {/* Bottom section */}
       <div style={{ padding: '1rem 0.75rem', borderTop: '1px solid var(--border)' }}>
+
+        {/* Install PWA button */}
+        <InstallPWA collapsed={collapsed} />
+
         {/* Theme Toggle */}
         <button onClick={toggleTheme} className="theme-toggle">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -94,6 +106,7 @@ export default function Layout() {
           </div>
         )}
 
+        {/* Logout */}
         <button onClick={handleLogout} className="btn btn-ghost"
           style={{ width: '100%', justifyContent: collapsed ? 'center' : 'flex-start' }}>
           <LogoutIcon size={16} />
@@ -111,8 +124,7 @@ export default function Layout() {
         background: 'var(--surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column',
-        transition: 'width 0.3s',
-        overflow: 'hidden',
+        transition: 'width 0.3s', overflow: 'hidden',
         position: 'fixed', height: '100vh', zIndex: 200,
       }} className="hide-mobile">
         {sidebarContent}
@@ -137,20 +149,23 @@ export default function Layout() {
           style={{ display: 'block', position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 250 }} />
       )}
 
+      {/* Main */}
       <main style={{
         marginLeft: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)',
         flex: 1, transition: 'margin-left 0.3s', minHeight: '100vh', minWidth: 0,
       }}>
         {/* Mobile top bar */}
-        <div style={{ display: 'none', alignItems: 'center', gap: '1rem', padding: '0.9rem 1rem', background: 'var(--surface)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 100 }}
+        <div style={{ display: 'none', alignItems: 'center', gap: '1rem', padding: '0.9rem 1rem',
+          background: 'var(--surface)', borderBottom: '1px solid var(--border)',
+          position: 'sticky', top: 0, zIndex: 100 }}
           className="mobile-top-bar">
           <button onClick={() => setMobileOpen(o => !o)} className="hamburger">
             {mobileOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}
           </button>
           <LogoIcon size={24} />
           <span style={{ fontFamily: 'Space Grotesk', fontWeight: 600, fontSize: '1rem' }}>FinTrack Pro</span>
-          {/* Theme toggle in mobile header */}
-          <button onClick={toggleTheme} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <button onClick={toggleTheme}
+            style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             {isDark ? <SunIcon /> : <MoonIcon />}
           </button>
         </div>
